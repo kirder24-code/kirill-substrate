@@ -8,6 +8,9 @@ A single-person experiment in what one operator + LLMs can ship when you treat A
 
 Built April 6 - May 13, 2026 by Kirill D.
 
+![Tolik Mission Control - the operator interface to Substrate](screenshots/tolik-mission-control.png)
+*Tolik Mission Control — the operator interface to Substrate. Push-to-talk voice, live metrics, morning brief, pipeline intel, real-time substrate state visualization.*
+
 ---
 
 ## Why this exists
@@ -33,6 +36,40 @@ Substrate is the result. It is not a framework. It is not a library. It is a wor
 | **Multi-vendor LLM providers** | Anthropic Claude, OpenAI GPT, Google Gemini, Groq Llama |
 | **Build window** | April 6 - May 13, 2026 (37 days, solo) |
 | **Commits** | 144 |
+
+---
+
+## Where to start (for engineers and recruiters reading code)
+
+The repo has 459 modules. These 12 files are the most representative — start here.
+
+### Cognitive layers
+| File | What it shows |
+|---|---|
+| [`scripts/cortex/deep-think.mjs`](scripts/cortex/deep-think.mjs) | 3-stage adversarial reasoning: Planner (GPT-4o) → Critic (GPT-4o-mini) → Resolver |
+| [`scripts/cortex/feedback-extractor.mjs`](scripts/cortex/feedback-extractor.mjs) | Subprocess Claude CLI as a tool-using agent. Reads operator conversations, extracts behavioral directives with confidence scores |
+| [`scripts/cortex/world-model.mjs`](scripts/cortex/world-model.mjs) | Organism belief graph: 591 beliefs, weighted, queryable, integrated from outcomes |
+| [`scripts/cortex/cortex-daemon.mjs`](scripts/cortex/cortex-daemon.mjs) | Top-level cognitive loop tying perception, reasoning, action together |
+
+### Discipline layer (honesty enforcement)
+| File | What it shows |
+|---|---|
+| [`scripts/survival/opportunity-store.mjs`](scripts/survival/opportunity-store.mjs) | ISA gate: refuses to mark opportunities "done" without verified Information State Criteria |
+| [`scripts/factory/egress-guard.mjs`](scripts/factory/egress-guard.mjs) | Blocks credential leaks (API keys, env paths) in outbound messages |
+| [`scripts/factory/injection-scanner.mjs`](scripts/factory/injection-scanner.mjs) | 25+ prompt-injection patterns scanned before LLM ingestion |
+
+### Visual Agent (team-of-designers pipeline)
+| File | What it shows |
+|---|---|
+| [`scripts/content/visual-agent.mjs`](scripts/content/visual-agent.mjs) | Top-level orchestrator: 3 modes (FAST $0.005, FULL $0.025, BRIEF-ONLY $0) |
+| [`scripts/content/visual-orchestrator.mjs`](scripts/content/visual-orchestrator.mjs) | Parallel consultation of 5-7 specialist personas in 3.5 seconds |
+| [`scripts/content/visual-judge.mjs`](scripts/content/visual-judge.mjs) | Multimodal GPT-4o reads the rendered PNGs and selects the winner |
+
+### Operator interface
+| File | What it shows |
+|---|---|
+| [`scripts/tolik/router.mjs`](scripts/tolik/router.mjs) | Voice intent router; 49 tools registered |
+| [`scripts/jobs/find-jobs.py`](scripts/jobs/find-jobs.py) | Self-contained AI job aggregator (Indeed + LinkedIn + Glassdoor via JobSpy) with Kirill-profile-tuned scoring |
 
 ---
 
