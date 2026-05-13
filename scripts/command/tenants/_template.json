@@ -1,0 +1,37 @@
+{
+  "id": "<subdomain-or-slug>",
+  "name": "<Client Company Name>",
+  "logo_word": "<First word of brand>",
+  "logo_accent": "<Second word, shown in arc color>",
+  "color_arc": "#00c8ff",
+  "color_gold": "#c9a84c",
+  "color_void": "#07070d",
+  "departments": [
+    "FINANCE",
+    "SALES",
+    "OPERATIONS",
+    "MARKETING",
+    "TECHNOLOGY",
+    "STRATEGY"
+  ],
+  "voice": {
+    "wake_word": "<client-specific wake phrase>",
+    "tts_voice_id": "<ElevenLabs voice id>",
+    "greeting": "<Custom morning greeting>"
+  },
+  "data_sources": {
+    "primary_db": "<path to client's primary SQLite>",
+    "secondary_db": null,
+    "crm": null,
+    "stripe_account_id": null,
+    "cal_link": null
+  },
+  "modules": {
+    "morning_brief": true,
+    "voice_interface": true,
+    "telegram_approvals": true,
+    "whatsapp_inbox": false,
+    "sheets_pipeline": false
+  },
+  "notes": "Copy this file as <id>.json. The COMMAND dashboard auto-loads it via /api/state/tenant?id=<id>. Subdomain routing reads the leftmost hostname segment as the tenant id."
+}

@@ -1,0 +1,19 @@
+{
+  "id": "default",
+  "name": "Brand OS",
+  "logo_word": "BRAND",
+  "logo_accent": "OS",
+  "color_arc": "#00c8ff",
+  "color_gold": "#c9a84c",
+  "color_void": "#07070d",
+  "departments": ["FINANCE", "SALES", "OPERATIONS", "MARKETING", "TECHNOLOGY", "STRATEGY"],
+  "voice": {
+    "wake_word": "command",
+    "tts_voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "greeting": "Good morning. Here is your business at a glance."
+  },
+  "data_sources": {
+    "primary_db": ".data/survival.db",
+    "secondary_db": ".data/organism.db"
+  }
+}

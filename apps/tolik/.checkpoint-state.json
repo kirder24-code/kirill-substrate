@@ -1,0 +1,15 @@
+{
+  "committed_iscs": [
+    "ISC-1",
+    "ISC-2",
+    "ISC-3",
+    "ISC-4",
+    "ISC-6",
+    "ISC-9",
+    "ISC-10",
+    "ISC-12"
+  ],
+  "last_commit_sha": {
+    "ISC-1": "b13d0c26d8aa3b94755245577e37527eb7251905"
+  }
+}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><title>{{big_title}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--void:#05070a;--surface:rgba(0,200,255,0.04);--border:rgba(0,200,255,0.18);--accent:#00c8ff;--red:#ff3d5a;--text:#f5f7fb;--text-2:rgba(245,247,251,0.66);--text-3:rgba(245,247,251,0.36);}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1080px;background:var(--void);color:var(--text);font-family:"Inter",sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+.frame{position:relative;width:100%;height:100%;padding:64px 56px 56px;display:flex;flex-direction:column;gap:32px;z-index:1}
+.header{display:flex;align-items:center;gap:14px}
+.header .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 18px var(--accent)}
+.header .kicker{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:0.24em;text-transform:uppercase;color:var(--text-3)}
+.headline{font-family:"Syne",sans-serif;font-weight:700;font-size:44px;line-height:1.1;letter-spacing:-0.02em;color:var(--text);max-width:92%}
+.headline .accent{color:var(--accent)}
+.split{display:grid;grid-template-columns:1fr 60px 1fr;flex:1;gap:0;align-items:stretch}
+.col{padding:32px 28px;border:1px solid var(--border);background:var(--surface);border-radius:4px;display:flex;flex-direction:column;gap:18px}
+.col.before{border-color:rgba(255,61,90,0.3);background:rgba(255,61,90,0.04)}
+.col.after{border-color:rgba(0,200,255,0.32);background:rgba(0,200,255,0.06)}
+.col-label{font-family:"JetBrains Mono",monospace;font-size:13px;letter-spacing:0.22em;text-transform:uppercase}
+.col.before .col-label{color:var(--red)}
+.col.after .col-label{color:var(--accent)}
+.col-title{font-family:"Syne",sans-serif;font-weight:700;font-size:26px;line-height:1.2;color:var(--text)}
+.col-list{display:flex;flex-direction:column;gap:14px;margin-top:8px;flex:1}
+.col-item{display:flex;align-items:flex-start;gap:12px;font-size:17px;line-height:1.4;color:var(--text-2)}
+.col-item::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:9px}
+.col.before .col-item::before{background:var(--red);box-shadow:0 0 8px rgba(255,61,90,0.4)}
+.col.after .col-item::before{background:var(--accent);box-shadow:0 0 8px rgba(0,200,255,0.4)}
+.divider{display:flex;justify-content:center;align-items:center;font-family:"Syne",sans-serif;font-size:64px;font-weight:800;color:var(--accent);opacity:0.55}
+.footer{display:flex;justify-content:space-between;align-items:end;padding-top:18px;border-top:1px solid var(--border)}
+.footer .brand{font-family:"JetBrains Mono",monospace;font-size:14px;color:var(--text-2);letter-spacing:0.12em}
+.footer .author{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase}
+</style></head>
+<body>
+  <div class="frame">
+    <div class="header"><div class="dot"></div><div class="kicker">{{kicker}}</div></div>
+    <div class="headline">{{big_title_html}}</div>
+    <div class="split">
+      <div class="col before">
+        <div class="col-label">{{before_label}}</div>
+        <div class="col-title">{{before_title}}</div>
+        <div class="col-list">{{before_items_html}}</div>
+      </div>
+      <div class="divider">→</div>
+      <div class="col after">
+        <div class="col-label">{{after_label}}</div>
+        <div class="col-title">{{after_title}}</div>
+        <div class="col-list">{{after_items_html}}</div>
+      </div>
+    </div>
+    <div class="footer"><div class="brand">{{brand}}</div><div class="author">{{author}} · {{domain}}</div></div>
+  </div>
+</body></html>

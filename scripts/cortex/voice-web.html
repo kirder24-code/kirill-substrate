@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CORTEX Voice</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a0a0f; color: #e0e0e0; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.status { font-size: 18px; color: #666; margin-bottom: 20px; }
+.status.listening { color: #44ff88; }
+.status.thinking { color: #ffaa44; }
+.status.speaking { color: #4488ff; }
+.heard { font-size: 14px; color: #888; margin: 10px 0; max-width: 600px; text-align: center; }
+.response { font-size: 20px; color: #fff; max-width: 700px; text-align: center; line-height: 1.6; margin: 20px 0; min-height: 100px; }
+.ring { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #333; display: flex; align-items: center; justify-content: center; margin-bottom: 30px; transition: all 0.3s; }
+.ring.listening { border-color: #44ff88; box-shadow: 0 0 30px rgba(68,255,136,0.3); }
+.ring.thinking { border-color: #ffaa44; box-shadow: 0 0 30px rgba(255,170,68,0.3); animation: pulse 1s infinite; }
+.ring.speaking { border-color: #4488ff; box-shadow: 0 0 30px rgba(68,136,255,0.3); }
+.ring-text { font-size: 14px; font-weight: bold; letter-spacing: 2px; }
+@keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+.wake-word { font-size: 12px; color: #555; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<div class="ring" id="ring"><span class="ring-text">CORTEX</span></div>
+<div class="status" id="status">Initializing...</div>
+<div class="heard" id="heard"></div>
+<div class="response" id="response"></div>
+<div class="wake-word">Say "Cortex" to activate</div>
+
+<script>
+const WAKE_WORD = /cortex/i;
+const SERVER = 'http://localhost:3848';
+
+let recognition;
+let isProcessing = false;
+let buffer = '';
+
+function setStatus(text, cls) {
+  document.getElementById('status').textContent = text;
+  document.getElementById('status').className = 'status ' + cls;
+  document.getElementById('ring').className = 'ring ' + cls;
+}
+
+function startListening() {
+  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+    setStatus('Speech recognition not supported. Use Chrome.', '');
+    return;
+  }
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+
+  recognition.onstart = () => {
+    if (!isProcessing) setStatus('Listening...', 'listening');
+  };
+
+  recognition.onresult = (event) => {
+    if (isProcessing) return;
+
+    let transcript = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      transcript += event.results[i][0].transcript;
+    }
+
+    document.getElementById('heard').textContent = transcript;
+
+    // Check for wake word in final results only
+    const lastResult = event.results[event.results.length - 1];
+    if (lastResult.isFinal && WAKE_WORD.test(transcript)) {
+      const question = transcript.replace(WAKE_WORD, '').replace(/^[\s,.:]+/, '').trim();
+      if (question.length > 2) {
+        processQuestion(question);
+      } else {
+        speak("Yes, I am here. What would you like to know?");
+      }
+    }
+  };
+
+  recognition.onerror = (e) => {
+    console.log('Recognition error:', e.error);
+    if (e.error !== 'no-speech') {
+      setTimeout(() => recognition.start(), 500);
+    }
+  };
+
+  recognition.onend = () => {
+    if (!isProcessing) {
+      setTimeout(() => {
+        try { recognition.start(); } catch {}
+      }, 300);
+    }
+  };
+
+  recognition.start();
+  setStatus('Listening...', 'listening');
+}
+
+async function processQuestion(question) {
+  isProcessing = true;
+  setStatus('Thinking...', 'thinking');
+  document.getElementById('heard').textContent = 'Q: ' + question;
+
+  try {
+    const res = await fetch(SERVER + '/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question }),
+    });
+    const data = await res.json();
+
+    document.getElementById('response').textContent = data.response;
+    setStatus('Speaking...', 'speaking');
+
+    // Use browser TTS directly - no autoplay issues
+    function resumeListening() {
+      isProcessing = false;
+      setStatus('Listening...', 'listening');
+      setTimeout(() => { try { recognition.start(); } catch {} }, 500);
+    }
+
+    speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(data.response);
+    utter.lang = 'en-US';
+    utter.rate = 0.85;
+    utter.pitch = 0.95;
+    // Pick a good male voice
+    const voices = speechSynthesis.getVoices();
+    const preferred = voices.find(v => v.name.includes('Daniel'))
+      || voices.find(v => v.name.includes('Aaron'))
+      || voices.find(v => v.name.includes('Arthur'))
+      || voices.find(v => /en.*Male/i.test(v.name + v.lang))
+      || voices.find(v => v.lang.startsWith('en'));
+    if (preferred) utter.voice = preferred;
+    utter.onend = resumeListening;
+    utter.onerror = resumeListening;
+    speechSynthesis.speak(utter);
+  } catch (e) {
+    document.getElementById('response').textContent = 'Connection error. Is voice-server running?';
+    isProcessing = false;
+    setStatus('Listening...', 'listening');
+    try { recognition.start(); } catch {}
+  }
+}
+
+function speak(text) {
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'en-US';
+  utter.rate = 0.9;
+  speechSynthesis.speak(utter);
+}
+
+// Preload voices
+speechSynthesis.getVoices();
+window.speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+
+// Start
+startListening();
+</script>
+</body>
+</html>

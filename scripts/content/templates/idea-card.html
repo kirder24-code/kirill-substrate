@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>{{big_title}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void: #05070a;
+    --surface: rgba(0,200,255,0.04);
+    --border: rgba(0,200,255,0.18);
+    --border-hi: rgba(0,200,255,0.32);
+    --accent: #00c8ff;
+    --gold: #c9a84c;
+    --text: #f5f7fb;
+    --text-2: rgba(245,247,251,0.66);
+    --text-3: rgba(245,247,251,0.36);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 1080px; height: 1080px;
+    background: var(--void);
+    color: var(--text);
+    font-family: "Inter", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+  /* subtle grid background */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,200,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,200,255,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+  /* arc-reactor glow in top-right corner */
+  body::after {
+    content: "";
+    position: fixed;
+    top: -300px; right: -300px;
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(0,200,255,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .frame {
+    position: relative;
+    width: 100%; height: 100%;
+    padding: 72px;
+    display: flex; flex-direction: column;
+    justify-content: space-between;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .header .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 18px var(--accent);
+  }
+  .header .kicker {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px; letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+
+  /* TITLE */
+  .title-block {
+    margin-top: 36px;
+    max-width: 90%;
+  }
+  .big-title {
+    font-family: "Syne", sans-serif;
+    font-weight: 800;
+    font-size: 64px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  .big-title .accent { color: var(--accent); }
+  .subtitle {
+    margin-top: 18px;
+    font-size: 22px; line-height: 1.45;
+    color: var(--text-2);
+    max-width: 85%;
+  }
+
+  /* DIAGRAM (horizontal flow) */
+  .diagram {
+    margin: 80px 0 40px;
+    display: flex; align-items: stretch;
+    gap: 0;
+  }
+  .step {
+    flex: 1;
+    position: relative;
+    padding: 24px 18px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 4px;
+    display: flex; flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+  }
+  .step + .step { margin-left: 18px; }
+  .step .label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .step .desc {
+    font-size: 15px; line-height: 1.35;
+    color: var(--text-2);
+  }
+  /* arrow between steps */
+  .step:not(:last-child)::after {
+    content: "›";
+    position: absolute;
+    right: -18px; top: 50%;
+    transform: translate(50%, -50%);
+    color: var(--accent);
+    font-size: 22px;
+    font-weight: 700;
+    z-index: 2;
+  }
+
+  /* FOOTER */
+  .footer {
+    display: flex; justify-content: space-between; align-items: end;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+  }
+  .footer .brand {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px;
+    color: var(--text-2);
+    letter-spacing: 0.12em;
+  }
+  .footer .author {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    color: var(--text-3);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+  <div class="frame">
+    <div>
+      <div class="header">
+        <div class="dot"></div>
+        <div class="kicker">{{kicker}}</div>
+      </div>
+      <div class="title-block">
+        <div class="big-title">{{big_title_html}}</div>
+        {{subtitle_block}}
+      </div>
+    </div>
+
+    <div class="diagram">
+      {{steps_html}}
+    </div>
+
+    <div class="footer">
+      <div class="brand">{{brand}}</div>
+      <div class="author">{{author}} · {{domain}}</div>
+    </div>
+  </div>
+</body>
+</html>

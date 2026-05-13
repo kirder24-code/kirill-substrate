@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@linkedin-brand-os/shared": ["packages/shared/src/index.ts"],
+      "@linkedin-brand-os/orchestrator": ["packages/orchestrator/src/index.ts"],
+      "@linkedin-brand-os/agent-services": ["packages/agent-services/src/index.ts"],
+      "@linkedin-brand-os/db": ["packages/db/src/index.ts"],
+      "@linkedin-brand-os/prompts": ["packages/prompts/src/index.ts"],
+      "@linkedin-brand-os/ai-providers": ["packages/ai-providers/src/index.ts"]
+    }
+  }
+}
+

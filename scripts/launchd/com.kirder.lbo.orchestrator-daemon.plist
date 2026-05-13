@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTD/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.kirder.lbo.orchestrator-daemon</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/kirder/.nvm/versions/node/v22.22.2/bin/node</string>
+        <string>/Users/kirder/Desktop/linkedin-brand-os/scripts/factory/orchestrator-daemon.mjs</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/kirder/Desktop/linkedin-brand-os</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>ThrottleInterval</key>
+    <integer>30</integer>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/lbo-orchestrator-daemon.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/lbo-orchestrator-daemon.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/Users/kirder/.nvm/versions/node/v22.22.2/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>HOME</key>
+        <string>/Users/kirder</string>
+        <!-- CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING removed from launchd plist April 7 2026:
+             It made orchestrator-loop hit max-turns 5 because fixed reasoning budget
+             takes more turns to complete. The Boris Charny fix is still active in
+             awareness-bot.mjs and awareness-research.mjs which use execSync with
+             their own env { CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING: '1' } - those
+             runs are independent of this daemon, so they keep the fix. -->
+    </dict>
+</dict>
+</plist>

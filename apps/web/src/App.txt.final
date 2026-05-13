@@ -1,0 +1,1806 @@
+
+  // Render helper for Legacy manual workflow
+  // Renders in Legacy surface only (no longer in Lab)
+  function renderLegacyManualWorkflow() {
+    return (
+      <>
+        {/* Legacy manual workflow: Signal → Idea → Content → Visual pipeline */}
+        <div className="mb-4 mt-12 border-b border-slate-200 pb-2">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">Manual Content Creation (Legacy)</h2>
+          <p className="mt-1 text-sm text-slate-600">Fallback for edge cases. Step-by-step manual workflow: Signal → Idea → Draft → Post</p>
+        </div>
+
+        <section className="grid gap-6 xl:grid-cols-3">
+          <Card>
+            <div className="flex items-center gap-2">
+              <Radar className="h-5 w-5 text-slate-600" />
+              <div>
+                <p className="text-sm text-muted">Manual Signals</p>
+                <h3 className="text-lg font-semibold">{counts.signals}</h3>
+              </div>
+            </div>
+            <form className="mt-4 space-y-3" onSubmit={handleCreateSignal}>
+              <div>
+                <label className="text-sm font-medium" htmlFor="signal-title">
+                  Signal title
+                </label>
+                <input
+                  id="signal-title"
+                  className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm"
+                  value={signalForm.title}
+                  onChange={(event) =>
+                    setSignalForm((current) => ({ ...current, title: event.target.value }))
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium" htmlFor="signal-source-type">
+                  Source type
+                </label>
+                <select
+                  id="signal-source-type"
+                  className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm"
+                  value={signalForm.sourceType}
+                  onChange={(event) =>
+                    setSignalForm((current) => ({
+                      ...current,
+                      sourceType: event.target.value as SourceType
+                    }))
+                  }
+                >
+                  <option value="manual">manual</option>
+                  <option value="research">research</option>
+                  <option value="crm">crm</option>
+                  <option value="social">social</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium" htmlFor="signal-raw-text">
+                  Raw text
+                </label>
+                <textarea
+                  id="signal-raw-text"
+                  className="mt-1 min-h-28 w-full rounded-lg border border-border px-3 py-2 text-sm"
+                  value={signalForm.rawText}
+                  onChange={(event) =>
+                    setSignalForm((current) => ({ ...current, rawText: event.target.value }))
+                  }
+                />
+              </div>
+              <button
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+                disabled={submittingSignal}
+                type="submit"
+              >
+                {submittingSignal ? (
+                  <LoaderCircle className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Plus className="h-4 w-4" />
+                )}
+                Create Signal
+              </button>
+            </form>
+          </Card>
+        </section>
+
+        {error ? (
+          <div className="mt-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            {error}
+          </div>
+        ) : null}
+
+        {Object.keys(loadErrors).length > 0 ? (
+          <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <p className="font-medium">Some sections failed to load.</p>
+            <ul className="mt-2 space-y-1">
+              {Object.entries(loadErrors).map(([sectionKey, sectionError]) => (
+                <li key={sectionKey}>
+                  {sectionError
+                    ? `${getSectionLabel(sectionKey as DashboardSectionKey)} failed: ${formatApiRequestError(sectionError)}`
+                    : null}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {loading ? (
+          <div className="mt-6 rounded-lg border border-border bg-white px-4 py-6 text-sm text-slate-600">
+            Loading dashboard...
+          </div>
+        ) : null}
+
+        <section className="mt-6 grid gap-6 xl:grid-cols-3">
+          <Card>
+            <div className="flex items-center gap-2">
+              <Radar className="h-5 w-5 text-slate-600" />
+              <div>
+                <p className="text-sm text-muted">Signals</p>
+                <h3 className="text-lg font-semibold">{counts.signals}</h3>
+              </div>
+            </div>
+            <div className="mt-4 space-y-3">
+              <SectionErrorMessage error={loadErrors.signals} label="Signals" />
+              {signals.map((signal) => (
+                <div
+                  key={signal.id}
+                  className={`rounded-lg border p-3 ${
+                    highlightedSignalId === signal.id
+                      ? "border-slate-900 bg-slate-50"
+                      : "border-border"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <h4 className="font-medium">{signal.title}</h4>
+                    {highlightedSignalId === signal.id ? (
+                      renderCompactBadge("Current", "current")
+                    ) : null}
+                  </div>
+                  <p className="mt-1 text-sm text-slate-600">{signal.rawText}</p>
+                  <div className="mt-3 flex items-center justify-between gap-3">
+                    <span className="text-xs uppercase tracking-[0.16em] text-slate-500">
+                      {signal.sourceType}
+                    </span>
+                    <button
+                      className="rounded-lg border border-border px-3 py-2 text-sm font-medium"
+                      disabled={workingSignalId === signal.id}
+                      onClick={() => void handleGenerateIdea(signal.id)}
+                      type="button"
+                    >
+                      {workingSignalId === signal.id ? "Generating..." : "Generate Idea"}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          <Card>
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-slate-600" />
+              <div>
+                <p className="text-sm text-muted">Ideas</p>
+                <h3 className="text-lg font-semibold">{counts.ideas}</h3>
+              </div>
+            </div>
+            <div className="mt-4 space-y-3">
+              <SectionErrorMessage error={loadErrors.ideas} label="Ideas" />
+              {ideas.map((idea) => (
+                <div key={idea.id} className="rounded-lg border border-border p-3">
+                  <h4 className="font-medium">{idea.title}</h4>
+                  <p className="mt-1 text-sm text-slate-600">{idea.coreInsight}</p>
+                  <p className="mt-2 text-xs text-slate-500">{idea.businessRelevance}</p>
+                  <div className="mt-3 flex items-center justify-between gap-3">
+                    <span className="text-xs uppercase tracking-[0.16em] text-slate-500">
+                      {idea.targetAudience}
+                    </span>
+                    <button
+                      className="rounded-lg border border-border px-3 py-2 text-sm font-medium"
+                      disabled={workingIdeaId === idea.id}
+                      onClick={() => void handleGenerateContent(idea.id)}
+                      type="button"
+                    >
+                      {workingIdeaId === idea.id ? "Generating..." : "Generate Content"}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          <Card>
+            <div className="flex items-center gap-2">
+              <PenSquare className="h-5 w-5 text-slate-600" />
+              <div>
+                <p className="text-sm text-muted">Content Drafts</p>
+                <h3 className="text-lg font-semibold">{counts.content}</h3>
+              </div>
+            </div>
+            <div className="mt-4 space-y-3">
+              <SectionErrorMessage error={loadErrors.content} label="Content drafts" />
+              {contentAssets.map((asset) => (
+                <div key={asset.id} className="rounded-lg border border-border p-3">
+                  <h4 className="font-medium">{asset.hook}</h4>
+                  <p className="mt-1 text-sm text-slate-600">{asset.body}</p>
+                  <p className="mt-2 text-xs text-slate-500">{asset.cta}</p>
+                  {asset.overallQualityScore ? (
+                    <p className="mt-2 text-xs text-slate-500">
+                      Quality: {asset.overallQualityScore} ({asset.qualityStatus})
+                    </p>
+                  ) : null}
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      className="rounded-lg border border-border px-3 py-2 text-sm font-medium"
+                      disabled={refiningContentId === asset.id}
+                      onClick={() => void handleRefineContent(asset.id)}
+                      type="button"
+                    >
+                      {refiningContentId === asset.id ? "Refining..." : "Refine Content"}
+                    </button>
+                    <button
+                      className="rounded-lg border border-border px-3 py-2 text-sm font-medium"
+                      disabled={visualizingContentId === asset.id}
+                      onClick={() => void handleGenerateVisual(asset.id)}
+                      type="button"
+                    >
+                      {visualizingContentId === asset.id ? "Generating..." : "Generate Visual"}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </section>
+
+        <section className="mt-6 grid gap-6 xl:grid-cols-2">
+          <Card>
+            <div className="flex items-center gap-2">
+              <WandSparkles className="h-5 w-5 text-slate-600" />
+              <div>
+                <p className="text-sm text-muted">Refined Content</p>
+                <h3 className="text-lg font-semibold">
+                  {contentAssets.filter((asset) => asset.refinementStatus === "refined").length} refined
+                </h3>
+              </div>
+            </div>
+            <div className="mt-4 space-y-3">
+              <SectionErrorMessage error={loadErrors.content} label="Refined content" />
+              <div className="rounded-lg border border-border bg-slate-50 p-3">
+                <div className="grid gap-3 md:grid-cols-3">
+                  <label className="text-sm text-slate-700">
+                    <span className="block text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                      Final post hook mode
+                    </span>
+                    <select
+                      aria-label="Final post hook mode"
+                      className="mt-2 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm"
+                      onChange={(event) =>
+                        setFinalPostConfig((current) => ({
+                          ...current,
+                          hookMode: event.target.value as FinalPostGenerationConfig["hookMode"]
+                        }))
+                      }
+                      value={finalPostConfig.hookMode ?? "sharp_observation"}
+                    >
+                      <option value="sharp_observation">Sharp observation</option>
+                      <option value="operational_tension">Operational tension</option>
+                      <option value="counterintuitive_claim">Counterintuitive claim</option>
+                      <option value="execution_lesson">Execution lesson</option>
+                      <option value="field_pattern">Field pattern</option>
+                    </select>
+                  </label>
+                  <label className="flex items-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-sm text-slate-700">
+                    <input
+                      aria-label="Enable anti-blandness shaping"
+                      checked={finalPostConfig.antiBlandness ?? false}
+                      onChange={(event) =>
+                        setFinalPostConfig((current) => ({
+                          ...current,
+                          antiBlandness: event.target.checked
+                        }))
+                      }
+                      type="checkbox"
+                    />
+                    <span>Enable anti-blandness shaping</span>
+                  </label>
+                  <label className="flex items-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-sm text-slate-700">
+                    <input
+                      aria-label="Enable outcome-aware shaping"
+                      checked={finalPostConfig.outcomeAwareShaping ?? false}
+                      onChange={(event) =>
+                        setFinalPostConfig((current) => ({
+                          ...current,
+                          outcomeAwareShaping: event.target.checked
+                        }))
+                      }
+                      type="checkbox"
+                    />
+                    <span>Enable outcome-aware shaping</span>
+                  </label>
+                </div>
+              </div>
+              {contentAssets
+                .filter((asset) => asset.refinementStatus === "refined")
+                .map((asset) => (
+                  <div key={asset.id} className="rounded-lg border border-border p-3">
+                    <h4 className="font-medium">{asset.refinedHook}</h4>
+                    <p className="mt-1 text-sm text-slate-600">{asset.refinedBody}</p>
+                    <p className="mt-2 text-xs text-slate-500">{asset.refinedCta}</p>
+                    {asset.overallQualityScore ? (
+                      <p className="mt-2 text-xs text-slate-500">
+                        Quality score: {asset.overallQualityScore}
+                      </p>
+                    ) : null}
+                    <button
+                      className="mt-3 rounded-lg border border-border px-3 py-2 text-sm font-medium"
+                      disabled={finalizingContentId === asset.id}
+                      onClick={() => void handleGenerateFinalPost(asset.id)}
+                      type="button"
+                    >
+                      {finalizingContentId === asset.id
+                        ? "Finalizing..."
+                        : "Generate Final Post (Legacy)"}
+                    </button>
+                    <button
+                      className="mt-2 rounded-lg border border-border px-3 py-2 text-sm font-medium"
+                      disabled={finalizingV2ContentId === asset.id}
+                      onClick={() => void handleGenerateFinalPostV2(asset.id)}
+                      type="button"
+                    >
+                      {finalizingV2ContentId === asset.id
+                        ? "Finalizing V2..."
+                        : "Generate Final Post V2 (Experimental)"}
+                    </button>
+                    <button
+                      className="mt-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium"
+                      disabled={comparingContentId === asset.id}
+                      onClick={() => void handleCompareFinalPostVariants(asset.id)}
+                      type="button"
+                    >
+                      {comparingContentId === asset.id
+                        ? "Comparing..."
+                        : "Compare Variants (Experimental)"}
+                    </button>
+                  </div>
+                ))}
+            </div>
+          </Card>
+
+          <Card>
+            <div className="flex items-center gap-2">
+              <PenSquare className="h-5 w-5 text-slate-600" />
+              <div>
+                <p className="text-sm text-muted">Final Posts</p>
+                <h3 className="text-lg font-semibold">{counts.finalPosts}</h3>
+              </div>
+            </div>
+            <div className="mt-4 space-y-3">
+              <SectionErrorMessage error={loadErrors.content} label="Final posts" />
+              {contentAssets
+                .filter((asset) => asset.finalStatus === "ready")
+                .map((asset) => (
+                  <article
+                    key={`legacy-${asset.id}`}
+                    className="rounded-lg border border-border bg-white p-4"
+                  >
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      Legacy Final Post
+                    </p>
+                    <h4 className="font-medium text-slate-950">{asset.finalHook}</h4>
+                    <div className="mt-3 space-y-3 text-sm leading-6 text-slate-700">
+                      {asset.finalBody?.split("\n\n").map((paragraph, index) => (
+                        <p key={`${asset.id}-paragraph-${index}`}>{paragraph}</p>
+                      ))}
+                    </div>
+                    <p className="mt-3 text-sm font-medium text-slate-800">
+                      {asset.finalClosing}
+                    </p>
+                    {asset.finalQualityScore ? (
+                      <p className="mt-2 text-xs text-slate-500">
+                        Final quality: {asset.finalQualityScore}
+                      </p>
+                    ) : null}
+                    {asset.finalQualityMetadata ? (
+                      <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                        <p>Hook strength: {asset.finalQualityMetadata.hookStrengthScore}</p>
+                        <p>Human feel: {asset.finalQualityMetadata.humanFeelScore}</p>
+                        <p>Specificity: {asset.finalQualityMetadata.specificityScore}</p>
+                        <p>Publishability: {asset.finalQualityMetadata.publishabilityScore}</p>
+                        {asset.finalQualityMetadata.appliedOutcomeBias ? (
+                          <p>Outcome bias: {asset.finalQualityMetadata.appliedOutcomeBias}</p>
+                        ) : null}
+                        {asset.finalQualityMetadata.notes.map((note) => (
+                          <p key={`${asset.id}-${note}`}>{note}</p>
+                        ))}
+                      </div>
+                    ) : null}
+                    {renderManualFeedbackControls("final_post", asset.id)}
+                  </article>
+                ))}
+              {experimentalFinalPosts.map((asset) => (
+                <article
+                  key={`v2-${asset.contentId ?? asset.signalId}`}
+                  className="rounded-lg border border-sky-200 bg-sky-50 p-4"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
+                      V2 Final Post
+                    </p>
+                    <p className="text-xs text-sky-700">
+                      {asset.generatorVersion} · {asset.mode}
+                    </p>
+                  </div>
+                  <h4 className="mt-2 font-medium text-slate-950">{asset.hook}</h4>
+                  <div className="mt-3 space-y-3 text-sm leading-6 text-slate-700">
+                    {asset.post.split("\n\n").map((paragraph, index) => (
+                      <p key={`${asset.contentId ?? asset.signalId}-v2-paragraph-${index}`}>
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
+                </article>
+              ))}
+              {finalPostComparison ? (
+                <article className="rounded-lg border border-slate-300 bg-slate-50 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                        Final Post Comparison
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        Content: {finalPostComparison.contentId}
+                      </p>
+                    </div>
+                    <p className="text-xs text-slate-500">
+                      Hook mode: {finalPostConfig.hookMode ?? "sharp_observation"} ·{" "}
+                      {finalPostConfig.antiBlandness ? "anti-blandness on" : "anti-blandness off"} ·{" "}
+                      {finalPostConfig.outcomeAwareShaping ? "outcome-aware on" : "outcome-aware off"}
+                    </p>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {[
+                      { label: "Hook only", value: "hook" },
+                      { label: "First paragraph", value: "firstParagraph" },
+                      { label: "Full post", value: "full" }
+                    ].map((option) => (
+                      <button
+                        key={option.value}
+                        className={`rounded-lg border px-3 py-1.5 text-xs font-medium ${
+                          finalPostComparisonViewMode === option.value
+                            ? "border-slate-900 bg-slate-900 text-white"
+                            : "border-border bg-white text-slate-700"
+                        }`}
+                        onClick={() =>
+                          setFinalPostComparisonViewMode(
+                            option.value as FinalPostComparisonViewMode
+                          )
+                        }
+                        type="button"
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="mt-4 grid gap-3 xl:grid-cols-3">
+                    {finalPostComparison.variants.map((variant) => (
+                      <section
+                        key={`${finalPostComparison.contentId}-${variant.label}`}
+                        className="rounded-lg border border-border bg-white p-4"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                            {variant.label}
+                          </p>
+                          {variant.mode ? (
+                            <p className="text-xs text-slate-500">{variant.mode}</p>
+                          ) : null}
+                        </div>
+                        <h4 className="mt-2 font-medium text-slate-950">{variant.hook}</h4>
+                        <div className="mt-3 space-y-3 text-sm leading-6 text-slate-700">
+                          {finalPostComparisonViewMode === "full" ? (
+                            variant.body.split("\n\n").map((paragraph, index) => (
+                              <p key={`${variant.label}-paragraph-${index}`}>{paragraph}</p>
+                            ))
+                          ) : (
+                            <p
+                              className={
+                                finalPostComparisonViewMode === "hook"
+                                  ? "font-medium text-slate-900"
+                                  : undefined
+                              }
+                            >
+                              {getComparisonDisplayText(
+                                variant,
+                                finalPostComparisonViewMode
+                              )}
+                            </p>
+                          )}
+                        </div>
+                        {variant.closing && finalPostComparisonViewMode === "full" ? (
+                          <p className="mt-3 text-sm font-medium text-slate-800">
+                            {variant.closing}
+                          </p>
+                        ) : null}
+                        {variant.qualityScore ? (
+                          <p className="mt-2 text-xs text-slate-500">
+                            Final quality: {variant.qualityScore}
+                          </p>
+                        ) : null}
+                        {variant.qualityMetadata ? (
+                          <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                            <p>Hook strength: {variant.qualityMetadata.hookStrengthScore}</p>
+                            <p>Human feel: {variant.qualityMetadata.humanFeelScore}</p>
+                            <p>Specificity: {variant.qualityMetadata.specificityScore}</p>
+                            <p>Publishability: {variant.qualityMetadata.publishabilityScore}</p>
+                            {variant.qualityMetadata.appliedOutcomeBias ? (
+                              <p>Outcome bias: {variant.qualityMetadata.appliedOutcomeBias}</p>
+                            ) : null}
+                            {variant.qualityMetadata.notes.map((note) => (
+                              <p key={`${variant.label}-${note}`}>{note}</p>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="mt-2 text-xs text-slate-500">
+                            {variant.notesFallback ?? "Metadata unavailable for this variant."}
+                          </p>
+                        )}
+                      </section>
+                    ))}
+                  </div>
+                </article>
+              ) : null}
+            </div>
+          </Card>
+
+          <Card>
+            <div className="flex items-center gap-2">
+              <ImagePlus className="h-5 w-5 text-slate-600" />
+              <div>
+                <p className="text-sm text-muted">Visual Briefs</p>
+                <h3 className="text-lg font-semibold">{counts.visuals}</h3>
+              </div>
+            </div>
+            <div className="mt-4 space-y-3">
+              <SectionErrorMessage error={loadErrors.visuals} label="Visual briefs" />
+              {visualAssets.map((visual) => (
+                <div key={visual.id} className="rounded-lg border border-border p-3">
+                  <h4 className="font-medium">{visual.title}</h4>
+                  <p className="mt-1 text-sm text-slate-600">{visual.prompt}</p>
+                  <p className="mt-2 text-xs text-slate-500">{visual.visualType}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </section>
+      </>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="grid min-h-screen lg:grid-cols-[240px_1fr]">
+        <aside className="border-r border-border bg-slate-950 px-6 py-8 text-slate-100">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+            Workspace
+          </p>
+          <h1 className="mt-3 text-2xl font-semibold">LinkedIn Brand OS</h1>
+          <p className="mt-4 text-sm text-slate-400">
+            Manual and open-source intake only. Queue planning only. No scraping or
+            auto-posting.
+          </p>
+        </aside>
+
+        <div className="flex min-h-screen flex-col">
+          <header className="border-b border-border bg-white/80 px-6 py-4 backdrop-blur">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm text-muted">
+                  Signal -&gt; Idea -&gt; Draft -&gt; Refined Draft -&gt; Visual Brief -&gt;
+                  Market Intelligence -&gt; Queue
+                </p>
+                <h2 className="text-xl font-semibold">Operator surfaces</h2>
+                <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Operator surface mode">
+                  <button
+                    aria-pressed={operatorDashboardMode === "day_1"}
+                    className={`rounded-lg border px-3 py-2 text-sm font-medium ${
+                      operatorDashboardMode === "day_1"
+                        ? "border-emerald-900 bg-emerald-900 text-white"
+                        : "border-border bg-white text-slate-700"
+                    }`}
+                    onClick={() => setOperatorDashboardMode("day_1")}
+                    type="button"
+                  >
+                    📝 Day-1
+                  </button>
+                  <button
+                    aria-pressed={operatorDashboardMode === "control"}
+                    className={`rounded-lg border px-3 py-2 text-sm font-medium ${
+                      operatorDashboardMode === "control"
+                        ? "border-blue-900 bg-blue-900 text-white"
+                        : "border-border bg-white text-slate-700"
+                    }`}
+                    onClick={() => setOperatorDashboardMode("control")}
+                    type="button"
+                  >
+                    🎛️ Control
+                  </button>
+                  <button
+                    aria-pressed={operatorDashboardMode === "lab"}
+                    className={`rounded-lg border px-3 py-2 text-sm font-medium ${
+                      operatorDashboardMode === "lab"
+                        ? "border-purple-900 bg-purple-900 text-white"
+                        : "border-border bg-white text-slate-700"
+                    }`}
+                    onClick={() => setOperatorDashboardMode("lab")}
+                    type="button"
+                  >
+                    ⚗️ Lab
+                  </button>
+                  <button
+                    aria-pressed={operatorDashboardMode === "legacy"}
+                    className={`rounded-lg border px-3 py-2 text-sm font-medium ${
+                      operatorDashboardMode === "legacy"
+                        ? "border-slate-900 bg-slate-900 text-white"
+                        : "border-border bg-white text-slate-700"
+                    }`}
+                    onClick={() => setOperatorDashboardMode("legacy")}
+                    type="button"
+                  >
+                    📋 Legacy
+                  </button>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-500">
+                  Signed in as
+                </p>
+                <p className="text-sm font-medium text-slate-700">{operatorSession.username}</p>
+                <button
+                  className="mt-2 rounded-lg border border-border px-3 py-2 text-sm font-medium"
+                  disabled={loggingOutOperator}
+                  onClick={() => void handleOperatorLogout()}
+                  type="button"
+                >
+                  {loggingOutOperator ? "Signing out..." : "Sign out"}
+                </button>
+              </div>
+            </div>
+          </header>
+
+          <main className="flex-1 px-6 py-6">
+            {operatorDashboardMode === "day_1" ? (
+              <section className="mb-6 space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold">📝 Your Content Day-1</h2>
+                  <p className="text-sm text-slate-600">Primary operator workflow: review drafts, record outcomes</p>
+                </div>
+
+                <Card role="region" aria-label="Autonomy summary">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Your autonomous content system</h3>
+                    {aiRuntimeHealth ? renderCompactBadge(
+                      aiRuntimeHealth.schedulerRuntimeEnabled ? "active" : "inactive",
+                      aiRuntimeHealth.schedulerRuntimeEnabled ? "repeat" : "neutral"
+                    ) : null}
+                  </div>
+                  <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      <span className="text-xs font-medium uppercase tracking-wider text-slate-500">Ready to review</span>
+                      <p className="mt-2 text-3xl font-bold text-emerald-600">
+                        {(() => {
+                          const reviewableDrafts = autonomousContentAssets.filter(d => d.contentStatus === "draft" || d.contentStatus === "ready");
+                          return reviewableDrafts.length;
+                        })()}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-600">
+                        {(() => {
+                          const reviewableDrafts = autonomousContentAssets.filter(d => d.contentStatus === "draft" || d.contentStatus === "ready");
+                          if (reviewableDrafts.length > 0) {
+                            return `${reviewableDrafts.length} ${reviewableDrafts.length === 1 ? 'draft needs' : 'drafts need'} your review`;
+                          } else {
+                            return "No drafts pending";
+                          }
+                        })()}
+                      </p>
+                    </div>
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      <span className="text-xs font-medium uppercase tracking-wider text-slate-500">Active sources</span>
+                      <p className="mt-2 text-3xl font-bold text-slate-900">
+                        {autonomousWatchlists.filter(w => w.isActive).length}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-600">
+                        watchlists monitoring for opportunities
+                      </p>
+                    </div>
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      <span className="text-xs font-medium uppercase tracking-wider text-slate-500">Last activity</span>
+                      {schedulerRuntimeStatus?.lastTickCompletedAt ? (
+                        <>
+                          <p className="mt-2 text-sm font-semibold text-slate-900">
+                            {formatTimeAgo(new Date(schedulerRuntimeStatus.lastTickCompletedAt))}
+                          </p>
+                          <p className="mt-1 text-xs text-slate-600">
+                            {schedulerRuntimeStatus.lastTickOutcome?.status === "completed" && schedulerRuntimeStatus.lastTickOutcome.runCount > 0 ? (
+                              `${schedulerRuntimeStatus.lastTickOutcome.runCount} task${schedulerRuntimeStatus.lastTickOutcome.runCount !== 1 ? 's' : ''} completed`
+                            ) : schedulerRuntimeStatus.lastTickOutcome?.status === "failed" ? (
+                              "Run failed - check Control"
+                            ) : "System idle"}
+                          </p>
+                        </>
+                      ) : aiRuntimeHealth?.schedulerRuntimeEnabled ? (
+                        <>
+                          <p className="mt-2 text-sm font-semibold text-slate-900">Starting...</p>
+                          <p className="mt-1 text-xs text-slate-600">First run pending</p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="mt-2 text-sm font-semibold text-slate-900">Not active</p>
+                          <p className="mt-1 text-xs text-slate-600">Enable in Control surface</p>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  {schedulerRuntimeStatus?.lastTickOutcome?.status === "failed" ? (
+                    <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3">
+                      <p className="text-sm font-medium text-red-900">⚠️ Attention needed</p>
+                      <p className="mt-1 text-sm text-red-700">{schedulerRuntimeStatus.lastTickOutcome.errorSummary}</p>
+                      <p className="mt-1 text-xs text-red-600">Check the Control surface for details</p>
+                    </div>
+                  ) : null}
+                  {!aiRuntimeHealth?.schedulerRuntimeEnabled && autonomousContentAssets.length === 0 ? (
+                    <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-3">
+                      <p className="text-sm font-medium text-blue-900">👋 Get started</p>
+                      <p className="mt-1 text-sm text-blue-700">
+                        Switch to Control surface to activate your autonomous system and add watchlist sources.
+                      </p>
+                    </div>
+                  ) : null}
+                </Card>
+
+                {loadErrors.autonomousContentAssets ? (
+                  <SectionErrorMessage error={loadErrors.autonomousContentAssets} label="Drafts" />
+                ) : autonomousContentAssets.length === 0 ? (
+                  <Card>
+                    <p className="text-sm text-slate-600">
+                      No drafts yet. The autonomous system will create content as it finds opportunities.
+                    </p>
+                  </Card>
+                ) : (() => {
+                  const reviewFirstDrafts = autonomousContentAssets.filter(d => d.contentStatus === "draft" || d.contentStatus === "ready");
+                  const needsEditDrafts = autonomousContentAssets.filter(d => d.contentStatus === "review");
+                  const archivedDrafts = autonomousContentAssets.filter(d => d.contentStatus === "archived");
+
+                  const scoreDraft = (draft: typeof autonomousContentAssets[0]) => {
+                    const createdAt = new Date(draft.createdAt).getTime();
+                    const ageScore = createdAt;
+                    const statusScore = draft.contentStatus === "ready" ? 3 : draft.contentStatus === "draft" ? 2 : 1;
+                    return ageScore + (statusScore * 1000000000000);
+                  };
+
+                  // Day-1 diversity gate: only show best draft from each opportunity
+                  const applyDiversityGate = (drafts: typeof autonomousContentAssets) => {
+                    // Group by sourceMatchedOpportunityId - drafts from same opportunity are near-identical
+                    const groups = new Map<string | undefined, typeof autonomousContentAssets>();
+
+                    for (const draft of drafts) {
+                      const key = draft.sourceMatchedOpportunityId || `unique-${draft.id}`;
+                      if (!groups.has(key)) {
+                        groups.set(key, []);
+                      }
+                      groups.get(key)!.push(draft);
+                    }
+
+                    // Pick best from each group
+                    const bestFromEachGroup = Array.from(groups.values()).map(group => {
+                      return group.sort((a, b) => {
+                        // First: finalQualityScore (if available)
+                        if (a.finalQualityScore !== undefined && b.finalQualityScore !== undefined) {
+                          if (a.finalQualityScore !== b.finalQualityScore) {
+                            return b.finalQualityScore - a.finalQualityScore;
+                          }
+                        }
+                        // Second: finalStatus priority (ready > needs_review > needs_work)
+                        const finalStatusScore = (fs?: string) => fs === "ready" ? 3 : fs === "needs_review" ? 2 : fs === "needs_work" ? 1 : 0;
+                        const aFinalScore = finalStatusScore(a.finalStatus);
+                        const bFinalScore = finalStatusScore(b.finalStatus);
+                        if (aFinalScore !== bFinalScore) {
+                          return bFinalScore - aFinalScore;
+                        }
+                        // Third: existing scoreDraft logic (contentStatus + recency)
+                        return scoreDraft(b) - scoreDraft(a);
+                      })[0];
+                    });
+
+                    return bestFromEachGroup;
+                  };
+
+                  const diverseReviewDrafts = applyDiversityGate(reviewFirstDrafts);
+                  const topDraft = diverseReviewDrafts.sort((a, b) => scoreDraft(b) - scoreDraft(a))[0];
+
+                  const renderDraftCard = (draft: typeof autonomousContentAssets[0], showSummary = false, isBestDraft = false) => {
+                    const createdAt = new Date(draft.createdAt).getTime();
+                    const now = Date.now();
+                    const isNew = (now - createdAt) < 24 * 60 * 60 * 1000;
+                    const statusLabel = draft.contentStatus === "ready" ? "Ready to publish" : draft.contentStatus === "draft" ? "Ready to review" : draft.contentStatus === "review" ? "Needs revision" : draft.contentStatus;
+                    const timeAgo = formatTimeAgo(new Date(draft.createdAt));
+                    const nextAction = "Review";
+
+                    const displayHook = draft.finalHook || draft.hook;
+                    const displayBody = draft.finalBody || draft.body;
+
+                    // Find source opportunity context
+                    const sourceOpportunity = draft.sourceMatchedOpportunityId
+                      ? matchedOpportunities.find(opp => opp.id === draft.sourceMatchedOpportunityId)
+                      : null;
+
+                    // Determine selection reasoning
+                    const selectionReason = (() => {
+                      if (draft.finalStatus === "ready") return "Auto-approved based on quality score";
+                      if (draft.finalQualityScore !== undefined && draft.finalQualityScore >= 7) return "High quality score from critic";
+                      if (draft.contentStatus === "ready") return "Previously approved by you";
+                      if (isNew) return "Recently created";
+                      return "Awaiting review";
+                    })();
+
+                    return (
+                      <div key={draft.id} data-testid={`draft-card-${draft.id}`} className="rounded-lg border border-slate-200 bg-white p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="font-semibold text-slate-900">{displayHook}</p>
+                              {isNew && (
+                                <span className="rounded bg-blue-100 px-1.5 py-0.5 text-xs font-medium text-blue-700">New</span>
+                              )}
+                              {draft.finalStatus === "ready" && (
+                                <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-xs font-medium text-emerald-700">Auto-approved</span>
+                              )}
+                              {draft.finalQualityScore !== undefined && draft.finalQualityScore >= 7 && (
+                                <span className="rounded bg-purple-100 px-1.5 py-0.5 text-xs font-medium text-purple-700">High quality</span>
+                              )}
+                            </div>
+                            {showSummary && displayBody ? (
+                              <p className="mt-2 text-sm text-slate-700 leading-relaxed">{displayBody.slice(0, 180)}{displayBody.length > 180 ? "..." : ""}</p>
+                            ) : draft.bestAngle ? (
+                              <p className="mt-2 text-sm text-slate-600 italic">"{draft.bestAngle}"</p>
+                            ) : null}
+                            {isBestDraft && sourceOpportunity ? (
+                              <div className="mt-3 rounded border border-slate-200 bg-slate-50 px-3 py-2">
+                                <p className="text-xs font-medium text-slate-700">📍 Source context</p>
+                                <p className="mt-1 text-xs text-slate-600">
+                                  {sourceOpportunity.title || "Matched opportunity"}
+                                </p>
+                                {sourceOpportunity.matchRationale ? (
+                                  <p className="mt-1 text-xs text-slate-500">{sourceOpportunity.matchRationale.slice(0, 100)}...</p>
+                                ) : null}
+                              </div>
+                            ) : null}
+                            <div className="mt-3 flex items-center gap-3 text-xs text-slate-500">
+                              <span>{statusLabel}</span>
+                              <span>•</span>
+                              <span>{timeAgo}</span>
+                              {!isBestDraft && draft.finalQualityScore !== undefined ? (
+                                <>
+                                  <span>•</span>
+                                  <span>Quality: {draft.finalQualityScore}/10</span>
+                                </>
+                              ) : null}
+                            </div>
+                            {isBestDraft ? (
+                              <div className="mt-2">
+                                <p className="text-xs text-emerald-700 font-medium">💡 {selectionReason}</p>
+                              </div>
+                            ) : null}
+                          </div>
+                          <div className="flex flex-col gap-2 items-end">
+                            <button
+                              className="rounded-lg border border-slate-900 bg-slate-900 text-white px-4 py-2 text-sm font-medium hover:bg-slate-800"
+                              onClick={() => handleOpenDraftReview(draft)}
+                              type="button"
+                            >
+                              {nextAction}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  };
+
+                  return (
+                    <>
+                      {topDraft && (
+                        <Card className="border-2 border-emerald-200 bg-emerald-50">
+                          <div className="flex items-start gap-3">
+                            <div className="mt-1 flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-white font-bold text-sm">
+                              1
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-emerald-900">Best draft to review now</h3>
+                              <p className="mt-1 text-sm text-emerald-800">
+                                {topDraft.contentStatus === "ready" ? "System approved this draft based on quality signals" : "Most recent high-quality draft from autonomous system"}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="mt-4">
+                            {renderDraftCard(topDraft, true, true)}
+                          </div>
+                        </Card>
+                      )}
+
+                      {diverseReviewDrafts.length > 1 && (
+                        <Card role="region" aria-label="Review first">
+                          <h3 className="text-lg font-semibold">Next drafts ({diverseReviewDrafts.length - 1})</h3>
+                          <div className="mt-4 space-y-3">
+                            {diverseReviewDrafts.slice(1, 6).map(draft => renderDraftCard(draft))}
+                          </div>
+                        </Card>
+                      )}
+
+                      {needsEditDrafts.length > 0 && (
+                        <details className="rounded-lg border border-slate-200 bg-white p-4">
+                          <summary className="cursor-pointer text-sm font-medium text-slate-600">
+                            Needs revision ({needsEditDrafts.length})
+                          </summary>
+                          <div className="mt-3 space-y-3" role="region" aria-label="Needs edit">
+                            {needsEditDrafts.slice(0, 3).map(draft => renderDraftCard(draft))}
+                          </div>
+                        </details>
+                      )}
+
+                      {archivedDrafts.length > 0 && (
+                        <details className="rounded-lg border border-slate-200 bg-white p-4">
+                          <summary className="cursor-pointer text-sm font-medium text-slate-600">
+                            Archived ({archivedDrafts.length})
+                          </summary>
+                          <div className="mt-3 space-y-3">
+                            {archivedDrafts.slice(0, 3).map(draft => renderDraftCard(draft))}
+                          </div>
+                        </details>
+                      )}
+                    </>
+                  );
+                })()}
+              </section>
+            ) : operatorDashboardMode === "control" ? (
+              <section className="mb-6 space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold">🎛️ Control & Monitoring</h2>
+                  <p className="text-sm text-slate-600">System health, runtime status, watchlists, and content flow oversight</p>
+                </div>
+
+            {operatorControlStatus && (
+              <section className="mt-6">
+                <Card>
+                  <div className="mb-4 flex items-center gap-2">
+                    <Radar className="h-5 w-5 text-emerald-600" />
+                    <h3 className="text-lg font-semibold">Operator Control</h3>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    {/* Runtime Health */}
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Runtime</span>
+                        {operatorControlStatus.runtimeHealth.schedulerEnabled ? (
+                          <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                            Active
+                          </span>
+                        ) : (
+                          <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-700">
+                            Inactive
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-2 space-y-1">
+                        {operatorControlStatus.runtimeHealth.lastTickAt && (
+                          <p className="text-xs text-slate-600">
+                            Last: {formatTimeAgo(new Date(operatorControlStatus.runtimeHealth.lastTickAt))}
+                          </p>
+                        )}
+                        {operatorControlStatus.runtimeHealth.failedRunsCount > 0 && (
+                          <p className="text-xs font-medium text-red-600">
+                            {operatorControlStatus.runtimeHealth.failedRunsCount} failed runs
+                          </p>
+                        )}
+                        {operatorControlStatus.runtimeHealth.staleRunsCount > 0 && (
+                          <p className="text-xs font-medium text-amber-600">
+                            {operatorControlStatus.runtimeHealth.staleRunsCount} stale runs
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Intake Health */}
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      <span className="text-sm font-medium">Intake</span>
+                      <div className="mt-2 space-y-1">
+                        <p className="text-xs text-slate-600">
+                          {operatorControlStatus.intakeHealth.activeWatchlists}/{operatorControlStatus.intakeHealth.totalWatchlists} active watchlists
+                        </p>
+                        <p className="text-xs text-slate-600">
+                          {operatorControlStatus.intakeHealth.recentSuccessfulRuns}/{operatorControlStatus.intakeHealth.last10RunsTotal} recent runs OK
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Opportunity Flow */}
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      <span className="text-sm font-medium">Opportunities</span>
+                      <div className="mt-2 space-y-1">
+                        <p className="text-xs text-slate-600">
+                          {operatorControlStatus.opportunityFlow.reviewQueueSize} in review queue
+                        </p>
+                        <p className="text-xs text-slate-600">
+                          {operatorControlStatus.opportunityFlow.newMatchesCount} new matches
+                        </p>
+                        <p className="text-xs text-slate-600">
+                          {operatorControlStatus.opportunityFlow.workItemsCount} work items
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Draft Flow */}
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      <span className="text-sm font-medium">Drafts</span>
+                      <div className="mt-2 space-y-1">
+                        <p className="text-xs text-slate-600">
+                          {operatorControlStatus.draftFlow.readyForReview} ready for review
+                        </p>
+                        {operatorControlStatus.draftFlow.blocked > 0 && (
+                          <p className="text-xs font-medium text-red-600">
+                            {operatorControlStatus.draftFlow.blocked} blocked
+                          </p>
+                        )}
+                        <p className="text-xs text-slate-600">
+                          {operatorControlStatus.draftFlow.totalActive} total active
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid gap-4 md:grid-cols-2">
+                    {/* Provider Truth */}
+                    <div className="rounded-lg border border-slate-200 bg-white p-3">
+                      <span className="text-sm font-medium">Provider Status</span>
+                      <div className="mt-2 space-y-1">
+                        <p className="text-xs text-slate-600">
+                          Mode: <span className="font-medium">{operatorControlStatus.providerTruth.mode}</span>
+                        </p>
+                        <p className="text-xs text-slate-600">
+                          Text: {operatorControlStatus.providerTruth.textProvider || "none"}
+                        </p>
+                        <p className="text-xs text-slate-600">
+                          AI Active: {operatorControlStatus.providerTruth.aiActive ? "Yes" : "No"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Learning Truth */}
+                    <div className="rounded-lg border border-slate-200 bg-white p-3">
+                      <span className="text-sm font-medium">Learning Status</span>
+                      <div className="mt-2 space-y-1">
+                        <p className="text-xs text-slate-600">
+                          {operatorControlStatus.learningTruth.recentAnalyticsCount} analytics (30d)
+                        </p>
+                        <p className="text-xs text-slate-600">
+                          {operatorControlStatus.learningTruth.strongPatternsCount} strong patterns
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Operator Attention */}
+                  <div className="mt-4 grid gap-4 md:grid-cols-3">
+                    {operatorControlStatus.operatorAttention.needsReview.length > 0 && (
+                      <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+                        <span className="text-sm font-medium text-amber-900">Needs Review</span>
+                        <ul className="mt-2 space-y-1">
+                          {operatorControlStatus.operatorAttention.needsReview.map((item, i) => (
+                            <li key={i} className="text-xs text-amber-800">{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {operatorControlStatus.operatorAttention.degraded.length > 0 && (
+                      <div className="rounded-lg border border-red-200 bg-red-50 p-3">
+                        <span className="text-sm font-medium text-red-900">Degraded</span>
+                        <ul className="mt-2 space-y-1">
+                          {operatorControlStatus.operatorAttention.degraded.map((item, i) => (
+                            <li key={i} className="text-xs text-red-800">{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {operatorControlStatus.operatorAttention.healthy.length > 0 && (
+                      <div className="rounded-lg border border-green-200 bg-green-50 p-3">
+                        <span className="text-sm font-medium text-green-900">Healthy</span>
+                        <ul className="mt-2 space-y-1">
+                          {operatorControlStatus.operatorAttention.healthy.map((item, i) => (
+                            <li key={i} className="text-xs text-green-800">{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              </section>
+            )}
+
+            <section className="mt-6">
+              <Card>
+                <div className="flex items-center gap-2">
+                  <Bookmark className="h-5 w-5 text-slate-600" />
+                  <div>
+                    <p className="text-sm text-muted">Operator Watchlists</p>
+                    <h3 className="text-lg font-semibold">
+                      Store watched sources for future live snapshots
+                    </h3>
+                  </div>
+                </div>
+                <form className="mt-4 grid gap-4 xl:grid-cols-2" onSubmit={handleAddWatchlistItem}>
+                  <div>
+                    <label className="text-sm font-medium" htmlFor="watchlist-source-kind">
+                      Watchlist source kind
+                    </label>
+                    <select
+                      id="watchlist-source-kind"
+                      className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm"
+                      value={watchlistForm.sourceKind}
+                      onChange={(event) =>
+                        setWatchlistForm((current) => ({
+                          ...current,
+                          sourceKind: event.target.value as WatchlistItem["sourceKind"]
+                        }))
+                      }
+                    >
+                      <option value="watched_url">watched_url</option>
+                      <option value="github_repo">github_repo</option>
+                      <option value="github_release">github_release</option>
+                      <option value="github_issue">github_issue</option>
+                      <option value="article_source">article_source</option>
+                      <option value="public_discussion_source">public_discussion_source</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium" htmlFor="watchlist-label">
+                      Watchlist label
+                    </label>
+                    <input
+                      id="watchlist-label"
+                      className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm"
+                      placeholder="Source name"
+                      value={watchlistForm.label}
+                      onChange={(event) =>
+                        setWatchlistForm((current) => ({
+                          ...current,
+                          label: event.target.value
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="xl:col-span-2">
+                    <label className="text-sm font-medium" htmlFor="watchlist-source-url">
+                      Watchlist source URL
+                    </label>
+                    <input
+                      id="watchlist-source-url"
+                      className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm"
+                      placeholder="Optional source URL"
+                      value={watchlistForm.sourceUrl}
+                      onChange={(event) =>
+                        setWatchlistForm((current) => ({
+                          ...current,
+                          sourceUrl: event.target.value
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="xl:col-span-2">
+                    <label className="text-sm font-medium" htmlFor="watchlist-notes">
+                      Watchlist notes
+                    </label>
+                    <textarea
+                      id="watchlist-notes"
+                      className="mt-1 min-h-20 w-full rounded-lg border border-border px-3 py-2 text-sm"
+                      placeholder="Optional notes for future snapshots"
+                      value={watchlistForm.notes}
+                      onChange={(event) =>
+                        setWatchlistForm((current) => ({
+                          ...current,
+                          notes: event.target.value
+                        }))
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium" htmlFor="watchlist-refresh-cadence">
+                      Refresh cadence
+                    </label>
+                    <select
+                      id="watchlist-refresh-cadence"
+                      className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm"
+                      value={watchlistForm.refreshCadence}
+                      onChange={(event) =>
+                        setWatchlistForm((current) => ({
+                          ...current,
+                          refreshCadence: event.target.value as WatchlistItem["refreshCadence"]
+                        }))
+                      }
+                    >
+                      <option value="manual_only">Manual only</option>
+                      <option value="daily_candidate">Daily candidate</option>
+                      <option value="weekly_candidate">Weekly candidate</option>
+                    </select>
+                  </div>
+                  <div className="flex items-end">
+                    <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                      <input
+                        checked={watchlistForm.priority === "high"}
+                        onChange={(event) =>
+                          setWatchlistForm((current) => ({
+                            ...current,
+                            priority: event.target.checked ? "high" : "normal"
+                          }))
+                        }
+                        type="checkbox"
+                      />
+                      <span>High priority</span>
+                    </label>
+                  </div>
+                  <button
+                    className="w-fit rounded-lg border border-border px-3 py-2 text-sm font-medium xl:col-span-2"
+                    type="submit"
+                  >
+                    Add to Watchlist
+                  </button>
+                </form>
+                {watchlistActionMessage ? (
+                  <p className="mt-4 text-sm text-slate-600">{watchlistActionMessage}</p>
+                ) : null}
+                {watchlistItems.length > 0 ? (
+                  <div className="mt-4 rounded-lg border border-border bg-white p-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {renderCompactBadge(`${watchlistItems.length} watched`, "neutral")}
+                      {watchlistItems.length !== filteredWatchlistItems.length
+                        ? renderCompactBadge(`${filteredWatchlistItems.length} visible`, "neutral")
+                        : null}
+                      <button
+                        className="rounded-lg border border-border px-2 py-1 text-xs font-medium"
+                        onClick={handleRefreshActiveWatchlists}
+                        type="button"
+                      >
+                        Refresh active watchlists
+                      </button>
+                      <button
+                        className="rounded-lg border border-border px-2 py-1 text-xs font-medium"
+                        onClick={() => handleRefreshWatchlistsByCadence("daily_candidate")}
+                        type="button"
+                      >
+                        Refresh daily candidates
+                      </button>
+                      <button
+                        className="rounded-lg border border-border px-2 py-1 text-xs font-medium"
+                        onClick={() => handleRefreshWatchlistsByCadence("weekly_candidate")}
+                        type="button"
+                      >
+                        Refresh weekly candidates
+                      </button>
+                    </div>
+                    <div className="mt-4 space-y-3 rounded-lg border border-border bg-slate-50 p-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {(
+                          [
+                            ["all", "All"],
+                            ["active", "Active"],
+                            ["inactive", "Inactive"]
+                          ] as const
+                        ).map(([value, label]) => (
+                          <button
+                            key={value}
+                            aria-pressed={activeWatchlistFilter === value}
+                            className={`rounded-full border px-3 py-1 text-xs font-medium ${
+                              activeWatchlistFilter === value
+                                ? "border-slate-900 bg-slate-900 text-white"
+                                : "border-border bg-white text-slate-700"
+                            }`}
+                            onClick={() => setActiveWatchlistFilter(value)}
+                            type="button"
+                          >
+                            {label} (
+                            {
+                              watchlistFilterCounts[
+                                value as keyof typeof watchlistFilterCounts
+                              ]
+                            }
+                            )
+                          </button>
+                        ))}
+                      </div>
+                      <div className="grid gap-3 md:grid-cols-3">
+                        <label className="text-xs font-medium text-slate-600">
+                          <span className="block">Cadence filter</span>
+                          <select
+                            aria-label="Watchlist cadence filter"
+                            className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm"
+                            onChange={(event) =>
+                              setActiveWatchlistCadenceFilter(
+                                event.target.value as WatchlistCadenceFilter
+                              )
+                            }
+                            value={activeWatchlistCadenceFilter}
+                          >
+                            {(
+                              [
+                                "all",
+                                "manual_only",
+                                "daily_candidate",
+                                "weekly_candidate"
+                              ] as const
+                            ).map((value) => (
+                              <option key={value} value={value}>
+                                {formatWatchlistCadenceLabel(value)} (
+                                {
+                                  watchlistCadenceFilterCounts[
+                                    value as keyof typeof watchlistCadenceFilterCounts
+                                  ]
+                                }
+                                )
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <label className="text-xs font-medium text-slate-600">
+                          <span className="block">Priority filter</span>
+                          <select
+                            aria-label="Watchlist priority filter"
+                            className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm"
+                            onChange={(event) =>
+                              setActiveWatchlistPriorityFilter(
+                                event.target.value as WatchlistPriorityFilter
+                              )
+                            }
+                            value={activeWatchlistPriorityFilter}
+                          >
+                            {(["all", "high", "normal"] as const).map((value) => (
+                              <option key={value} value={value}>
+                                {formatWatchlistPriorityLabel(value)} (
+                                {
+                                  watchlistPriorityFilterCounts[
+                                    value as keyof typeof watchlistPriorityFilterCounts
+                                  ]
+                                }
+                                )
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <label className="text-xs font-medium text-slate-600">
+                          <span className="block">Source kind filter</span>
+                          <select
+                            aria-label="Watchlist source kind filter"
+                            className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm"
+                            onChange={(event) =>
+                              setActiveWatchlistSourceKindFilter(
+                                event.target.value as WatchlistSourceKindFilter
+                              )
+                            }
+                            value={activeWatchlistSourceKindFilter}
+                          >
+                            {(
+                              [
+                                "all",
+                                "watched_url",
+                                "github_repo",
+                                "github_release",
+                                "github_issue",
+                                "article_source",
+                                "public_discussion_source"
+                              ] as const
+                            ).map((value) => (
+                              <option key={value} value={value}>
+                                {formatWatchlistSourceKindLabel(value)} (
+                                {
+                                  watchlistSourceKindFilterCounts[
+                                    value as keyof typeof watchlistSourceKindFilterCounts
+                                  ]
+                                }
+                                )
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      </div>
+                    </div>
+                    <div className="mt-4 space-y-3">
+                      {filteredWatchlistItems.length > 0 ? (
+                        filteredWatchlistItems.map((item) => (
+                        <div key={item.id} className="rounded-lg border border-border p-3">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="text-sm font-medium">{item.label}</p>
+                            {renderCompactBadge(item.sourceKind, "neutral")}
+                            {renderCompactBadge(item.isActive ? "active" : "inactive", "neutral")}
+                            {renderCompactBadge(item.refreshCadence.replace(/_/g, " "), "neutral")}
+                            {item.priority === "high"
+                              ? renderCompactBadge("high priority", "support")
+                              : null}
+                          </div>
+                          {item.sourceUrl ? (
+                            <p className="mt-1 text-xs text-slate-500">{item.sourceUrl}</p>
+                          ) : null}
+                          {item.notes ? (
+                            <p className="mt-2 text-sm text-slate-700">{item.notes}</p>
+                          ) : null}
+                          {item.lastUsedAt ? (
+                            <p className="mt-2 text-xs text-slate-500">
+                              Last used: {new Date(item.lastUsedAt).toLocaleString()}
+                            </p>
+                          ) : null}
+                          {item.lastRefreshedAt ? (
+                            <p className="mt-1 text-xs text-slate-500">
+                              Last refreshed: {new Date(item.lastRefreshedAt).toLocaleString()}
+                            </p>
+                          ) : null}
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <button
+                              className="rounded-lg border border-border px-2 py-1 text-xs font-medium"
+                              onClick={() => handleUseWatchlistForSnapshot(item)}
+                              type="button"
+                            >
+                              Use for snapshot
+                            </button>
+                            <button
+                              className="rounded-lg border border-border px-2 py-1 text-xs font-medium"
+                              onClick={() => handleCreateWatchlistSnapshot(item)}
+                              type="button"
+                            >
+                              Create snapshot
+                            </button>
+                            <button
+                              className="rounded-lg border border-border px-2 py-1 text-xs font-medium"
+                              disabled={!item.isActive}
+                              onClick={() => handleRefreshWatchlistItem(item)}
+                              type="button"
+                            >
+                              Refresh now
+                            </button>
+                            <button
+                              className="rounded-lg border border-border px-2 py-1 text-xs font-medium text-slate-600"
+                              onClick={() => handleSetWatchlistActive(item.id, !item.isActive)}
+                              type="button"
+                            >
+                              {item.isActive ? "Deactivate" : "Activate"}
+                            </button>
+                            <button
+                              className="rounded-lg border border-border px-2 py-1 text-xs font-medium text-slate-600"
+                              onClick={() => handleRemoveWatchlistItem(item.id)}
+                              type="button"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                        ))
+                      ) : (
+                        <p className="text-sm text-slate-500">
+                          No watchlists match these filters.
+                        </p>
+                      )}
+                    </div>
+                    <p className="mt-3 text-sm text-slate-500">
+                      Watchlists define sources only. They do not fetch or run scout processing.
+                    </p>
+                  </div>
+                ) : (
+                  <p className="mt-4 text-sm text-slate-500">
+                    Add watched sources here so future live snapshots are faster to capture.
+                  </p>
+                )}
+              </Card>
+            </section>
+            </section>
+            ) : operatorDashboardMode === "lab" ? (
+              {renderLabSurface()}
+            ) : operatorDashboardMode === "legacy" ? (
+              <section className="mb-6 space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold">📋 Legacy Manual Workflow</h2>
+                  <p className="text-sm text-slate-600">Fallback manual content creation path</p>
+                </div>
+                <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="text-sm text-slate-700">
+                    Manual signal → idea → content workflow. Use only when autonomous system cannot handle your use case.
+                  </p>
+                </div>
+
+                {renderLegacyManualWorkflow()}
+              </section>
+            ) : null}
+
+            {/* Draft Review Dialog */}
+            {reviewingDraftDocument ? (
+              <div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+                onClick={handleCloseDraftReview}
+              >
+                <div
+                  role="dialog"
+                  aria-label="Draft review"
+                  className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg bg-white p-6 shadow-xl"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                          {reviewingDraftDocument.finalHook || reviewingDraftDocument.finalBody ? "LinkedIn-Ready Post" : "Draft Content"}
+                        </span>
+                        {reviewingDraftDocument.finalStatus === "ready" && (
+                          <span className="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">Auto-approved</span>
+                        )}
+                        {reviewingDraftDocument.finalQualityScore !== undefined && (
+                          <span className="rounded bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700">
+                            Quality: {reviewingDraftDocument.finalQualityScore}/10
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-3 whitespace-pre-wrap rounded-lg border-2 border-slate-200 bg-white p-6 text-base leading-relaxed">
+                        {reviewingDraftDocument.finalHook || reviewingDraftDocument.finalBody ? (
+                          <>
+                            <div className="font-semibold text-lg text-slate-900">{reviewingDraftDocument.finalHook}</div>
+                            {reviewingDraftDocument.finalBody && (
+                              <div className="mt-4 text-slate-800">{reviewingDraftDocument.finalBody}</div>
+                            )}
+                            {reviewingDraftDocument.finalClosing && (
+                              <div className="mt-4 text-slate-700">{reviewingDraftDocument.finalClosing}</div>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <div className="font-semibold text-lg text-slate-900">{reviewingDraftDocument.hook}</div>
+                            {reviewingDraftDocument.body && (
+                              <div className="mt-4 text-slate-800">{reviewingDraftDocument.body}</div>
+                            )}
+                            {reviewingDraftDocument.cta && (
+                              <div className="mt-4 text-slate-700 italic">{reviewingDraftDocument.cta}</div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      className="rounded-lg p-2 hover:bg-slate-100 flex-shrink-0"
+                      onClick={handleCloseDraftReview}
+                      type="button"
+                      aria-label="Close dialog"
+                    >
+                      <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* Context and reasoning */}
+                  <div className="mt-6 grid gap-4 md:grid-cols-2">
+                    {(() => {
+                      const sourceOpportunity = reviewingDraftDocument.sourceMatchedOpportunityId
+                        ? matchedOpportunities.find(opp => opp.id === reviewingDraftDocument.sourceMatchedOpportunityId)
+                        : null;
+
+                      return sourceOpportunity ? (
+                        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                          <p className="text-xs font-semibold uppercase tracking-wider text-blue-900">Source Context</p>
+                          <p className="mt-2 text-sm font-medium text-blue-900">
+                            {sourceOpportunity.title || "Matched opportunity"}
+                          </p>
+                          {sourceOpportunity.matchRationale && (
+                            <p className="mt-1 text-sm text-blue-800">{sourceOpportunity.matchRationale}</p>
+                          )}
+                        </div>
+                      ) : null;
+                    })()}
+
+                    {reviewingDraftDocument.bestAngle && (
+                      <div className="rounded-lg border border-purple-200 bg-purple-50 p-4">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-purple-900">Content Angle</p>
+                        <p className="mt-2 text-sm text-purple-800 italic">"{reviewingDraftDocument.bestAngle}"</p>
+                        <p className="mt-2 text-xs text-purple-700">This angle was selected by the autonomous system to best position this content for your audience.</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Status and metadata */}
+                  <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-slate-600">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">Status:</span>
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium">
+                        {reviewingDraftDocument.contentStatus === "ready" ? "Ready to publish" : reviewingDraftDocument.contentStatus === "draft" ? "Draft" : reviewingDraftDocument.contentStatus}
+                      </span>
+                    </div>
+                    <span className="text-slate-400">•</span>
+                    <span>Created {formatTimeAgo(new Date(reviewingDraftDocument.createdAt))}</span>
+                    {reviewingDraftDocument.finalStatus && (
+                      <>
+                        <span className="text-slate-400">•</span>
+                        <span className="capitalize">{reviewingDraftDocument.finalStatus.replace(/_/g, ' ')}</span>
+                      </>
+                    )}
+                  </div>
+
+                  {draftReviewError ? (
+                    <div className="mt-6 rounded-lg border border-red-200 bg-red-50 p-4">
+                      <p className="text-sm font-medium text-red-900">Action failed</p>
+                      <p className="mt-1 text-sm text-red-700">{draftReviewError}</p>
+                    </div>
+                  ) : null}
+
+                  {/* Quick outcome entry after approval */}
+                  {reviewingDraftDocument.contentStatus === "ready" && (
+                    <details className="mt-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+                      <summary className="cursor-pointer text-sm font-semibold text-emerald-900">
+                        📊 Record performance after publishing (optional)
+                      </summary>
+                      <div className="mt-4 text-sm text-emerald-800">
+                        <p className="mb-3">After you publish this draft to LinkedIn, come back to record the outcome:</p>
+                        <ol className="list-decimal list-inside space-y-1 text-xs">
+                          <li>Publish this post to LinkedIn</li>
+                          <li>Wait 24-48 hours for engagement</li>
+                          <li>Switch to Control surface → Analytics section</li>
+                          <li>Record impressions, likes, comments to feed learning back</li>
+                        </ol>
+                        <p className="mt-3 text-xs text-emerald-700">
+                          Recording outcomes helps the system learn what content performs well for your audience.
+                        </p>
+                      </div>
+                    </details>
+                  )}
+
+                  {/* Action buttons */}
+                  <div className="mt-6 flex items-center justify-between gap-3">
+                    <button
+                      className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-slate-50"
+                      onClick={handleCloseDraftReview}
+                      type="button"
+                      disabled={draftReviewActionInProgress}
+                    >
+                      Close
+                    </button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        className="rounded-lg border border-slate-300 bg-slate-100 px-4 py-2 text-sm font-medium hover:bg-slate-200"
+                        onClick={() => void handleDraftReviewAction(reviewingDraftDocument.id, "archived")}
+                        type="button"
+                        disabled={draftReviewActionInProgress}
+                      >
+                        {draftReviewActionInProgress ? "Processing..." : "Archive"}
+                      </button>
+                      {reviewingDraftDocument.contentStatus !== "review" && (
+                        <button
+                          className="rounded-lg border border-amber-300 bg-amber-100 px-4 py-2 text-sm font-medium hover:bg-amber-200"
+                          onClick={() => void handleDraftReviewAction(reviewingDraftDocument.id, "review")}
+                          type="button"
+                          disabled={draftReviewActionInProgress}
+                        >
+                          {draftReviewActionInProgress ? "Processing..." : "Needs revision"}
+                        </button>
+                      )}
+                      {reviewingDraftDocument.contentStatus !== "ready" && (
+                        <button
+                          className="rounded-lg bg-emerald-600 px-6 py-2 text-sm font-medium text-white hover:bg-emerald-700 font-semibold"
+                          onClick={() => void handleDraftReviewAction(reviewingDraftDocument.id, "ready")}
+                          type="button"
+                          disabled={draftReviewActionInProgress}
+                        >
+                          {draftReviewActionInProgress ? "Processing..." : "✓ Approve for publish"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+          </main>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function getAIScoutEnrichmentLines(
+  kind: "audience" | "solution" | "match",
+  enrichment: AIScoutEnrichment | undefined
+): string[] {
+  if (!enrichment) {
+    return [];
+  }
+
+  const preferredDetailsByKind: Record<"audience" | "solution" | "match", Array<string | undefined>> = {
+    audience: [enrichment.improvedSummary, enrichment.businessConsequence],
+    solution: [enrichment.improvedSummary, enrichment.operatorAngle],
+    match: [
+      enrichment.whyItMatters,
+      enrichment.businessConsequence,
+      enrichment.operatorAngle
+    ]
+  };
+  const fallbackDetails = [
+    enrichment.improvedSummary,
+    enrichment.whyItMatters,
+    enrichment.businessConsequence,
+    enrichment.operatorAngle
+  ];
+
+  const orderedDetails = [...preferredDetailsByKind[kind], ...fallbackDetails].filter(
+    (detail): detail is string => typeof detail === "string" && detail.trim().length > 0
+  );
+
+  return Array.from(new Set(orderedDetails)).slice(0, 2);
+}
+
+function supportsMatchContentGeneration(item: PersistedMatchedOpportunity) {
+  return (
+    item.status === "reviewed" &&
+    (item.match.recommendedAction === "write_post" ||
+      item.match.recommendedAction === "write_comment" ||
+      item.match.recommendedAction === "save_for_later")
+  );
+}
+
+function getAIContentGenerationLines(
+  action: MatchedOpportunity["recommendedAction"],
+  content: AIContentGeneration | undefined
+): Array<{ label: string; value: string }> {
+  if (!content) {
+    return [];
+  }
+
+  if (action === "write_post") {
+    return [
+      { label: "Content idea", value: content.contentIdea ?? "" },
+      { label: "Draft angle", value: content.draftAngle ?? "" },
+      { label: "Post seed", value: content.postSeed ?? "" }
+    ].filter((line) => line.value.trim().length > 0);
+  }
+
+  if (action === "write_comment") {
+    return [
+      { label: "Content idea", value: content.contentIdea ?? "" },
+      { label: "Draft angle", value: content.draftAngle ?? "" },
+      { label: "Comment seed", value: content.commentSeed ?? "" }
+    ].filter((line) => line.value.trim().length > 0);
+  }
+
+  return [
+    { label: "Content idea", value: content.contentIdea ?? "" },
+    { label: "Angle stub", value: content.angleStub ?? "" }
+  ].filter((line) => line.value.trim().length > 0);
+}
+
+function renderAIScoutEnrichment(
+  kind: "audience" | "solution" | "match",
+  enrichment: AIScoutEnrichment | undefined,
+  label = "AI insight"
+) {
+  const details = getAIScoutEnrichmentLines(kind, enrichment);
+
+  if (details.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50/80 p-3">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+        {label}
+      </p>
+      <div className="mt-2 space-y-1.5 text-sm text-slate-700">
+        {details.map((detail) => (
+          <p key={detail}>{detail}</p>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function renderAIContentGeneration(
+  action: MatchedOpportunity["recommendedAction"],
+  content: AIContentGeneration | undefined
+) {
+  const lines = getAIContentGenerationLines(action, content);
+
+  if (lines.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50/70 p-3">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-700">
+        AI content prep
+      </p>
+      <div className="mt-2 space-y-1.5 text-sm text-slate-700">
+        {lines.map((line) => (
+          <p key={line.label}>
+            <span className="font-medium">{line.label}:</span> {line.value}
+          </p>
+        ))}
+      </div>
+    </div>
+  );
+}

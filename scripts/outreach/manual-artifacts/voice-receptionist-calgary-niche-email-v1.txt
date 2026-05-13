@@ -1,0 +1,33 @@
+Subject: Every missed call from [BUSINESS NAME] costs you a booked job
+
+Hi [FIRST NAME],
+
+Quick question: what happens when someone calls [BUSINESS NAME] after hours and gets voicemail?
+
+Most Calgary [NICHE] businesses lose 30-40% of inbound calls to voicemail. Of those, roughly half never call back - they found someone else within minutes on Google.
+
+I built an AI voice receptionist that answers every call, 24/7, in under 2 seconds. It handles:
+- After-hours and weekend calls (your highest-intent leads)
+- Booking appointments directly into your calendar
+- Answering common questions so your team doesn't have to
+
+One detail worth knowing: it uses a Calgary local number so callers see a familiar area code. No offshore feel, no robotic hold music.
+
+You can hear it live right now: call (587) 318-XXXX and ask it to book a plumbing inspection. That's a live demo line.
+
+Setup takes one call with me (under 30 min). You're live the same week.
+
+Worth a 15-minute conversation to see if it fits [BUSINESS NAME]?
+
+Reply here or book directly: [CALENDAR LINK]
+
+Kirill
+AI Systems - LaunchSoloAI
+kirill@launchsoloai.com
+
+---
+[PERSONALIZATION NOTE - fill before sending]:
+- Replace [FIRST NAME], [BUSINESS NAME], [NICHE] with actual prospect data
+- Replace [CALENDAR LINK] with your Calendly/cal.com link
+- Replace (587) 318-XXXX with actual demo number once live
+- Best niches for this email: HVAC, plumbing, dental, physio, law firms, auto shops

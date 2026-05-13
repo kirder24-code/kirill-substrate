@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{big_title}}</title>
+<style>
+  :root {
+    --bg: #050608;
+    --grid: #0d0f12;
+    --ink: #e7e9ec;
+    --muted: #5a6068;
+    --accent: {{accent_hex}};
+    --syne: 'Syne', 'Inter Display', system-ui, sans-serif;
+    --inter: 'Inter', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 1080px; height: 1080px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--inter);
+    overflow: hidden;
+  }
+  body {
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 60px 60px;
+    background-position: -1px -1px;
+    position: relative;
+  }
+  .frame {
+    position: absolute; inset: 60px;
+    border: 1px solid #15181d;
+    display: flex; flex-direction: column;
+    padding: 64px 72px;
+  }
+  .kicker {
+    font-family: var(--mono);
+    font-size: 22px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .kicker .dot { color: var(--accent); }
+  .stage {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  .headline {
+    font-family: var(--syne);
+    font-weight: 700;
+    font-size: 124px;
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    max-width: 880px;
+  }
+  .word {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(28px);
+    animation: word-in 0.55s cubic-bezier(0.22,1,0.36,1) forwards;
+  }
+  .word.accent { color: var(--accent); }
+  .footer {
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-top: 1px solid #15181d;
+    padding-top: 22px;
+    font-family: var(--mono);
+    font-size: 18px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .footer .domain { color: var(--accent); }
+  .cursor {
+    display: inline-block;
+    width: 16px; height: 96px;
+    background: var(--accent);
+    margin-left: 14px;
+    transform: translateY(18px);
+    animation: cursor-blink 1.2s infinite step-end;
+  }
+  @keyframes word-in {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes cursor-blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+  /* Loop mechanic: after 'duration' seconds, fade everything to start, then restart.
+     Achieved with one outer wrapper that runs N seconds then resets. */
+  .loop-wrap {
+    width: 100%; height: 100%;
+    animation: loop {{duration_sec}}s linear infinite;
+  }
+  @keyframes loop {
+    0%   { opacity: 1; }
+    {{fade_out_at}}% { opacity: 1; }
+    {{fade_done_at}}% { opacity: 0; }
+    {{reset_at}}%    { opacity: 0; }
+    100% { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+  <div class="loop-wrap">
+    <div class="frame">
+      <div class="kicker">{{kicker}}<span class="dot"> ·</span> {{kicker_tag}}</div>
+      <div class="stage">
+        <h1 class="headline">{{words_html}}<span class="cursor"></span></h1>
+      </div>
+      <div class="footer">
+        <span>{{brand}}</span>
+        <span class="domain">{{domain}}</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

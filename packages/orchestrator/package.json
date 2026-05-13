@@ -1,0 +1,26 @@
+{
+  "name": "@linkedin-brand-os/orchestrator",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run src/**/*.test.ts"
+  },
+  "dependencies": {
+    "@linkedin-brand-os/agent-services": "workspace:*",
+    "@linkedin-brand-os/ai-providers": "workspace:*",
+    "@linkedin-brand-os/db": "workspace:*",
+    "@linkedin-brand-os/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.5",
+    "typescript": "^5.6.3"
+  }
+}

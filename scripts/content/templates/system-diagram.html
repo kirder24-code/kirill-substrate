@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><title>{{big_title}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--void:#05070a;--surface:rgba(0,200,255,0.04);--border:rgba(0,200,255,0.18);--accent:#00c8ff;--text:#f5f7fb;--text-2:rgba(245,247,251,0.66);--text-3:rgba(245,247,251,0.36);}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1350px;background:var(--void);color:var(--text);font-family:"Inter",sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+body::before{content:"";position:fixed;inset:0;background-image:linear-gradient(rgba(0,200,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,255,0.04) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+body::after{content:"";position:fixed;top:-300px;right:-300px;width:700px;height:700px;background:radial-gradient(circle,rgba(0,200,255,0.18) 0%,transparent 70%);pointer-events:none}
+.frame{position:relative;width:100%;height:100%;padding:72px;display:flex;flex-direction:column;justify-content:space-between;z-index:1}
+.header{display:flex;align-items:center;gap:14px}
+.header .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 18px var(--accent)}
+.header .kicker{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:0.24em;text-transform:uppercase;color:var(--text-3)}
+.title-block{margin-top:24px}
+.big-title{font-family:"Syne",sans-serif;font-weight:800;font-size:52px;line-height:1.05;letter-spacing:-0.02em;color:var(--text)}
+.big-title .accent{color:var(--accent)}
+.subtitle{margin-top:14px;font-size:20px;line-height:1.4;color:var(--text-2);max-width:88%}
+.stack{margin:48px 0;display:flex;flex-direction:column;gap:14px;flex:1;justify-content:center}
+.layer{position:relative;padding:28px 32px;border:1px solid var(--border);background:var(--surface);border-radius:4px;display:flex;align-items:center;gap:24px}
+.layer.highlight{border-color:rgba(0,200,255,0.5);background:rgba(0,200,255,0.08);box-shadow:0 0 24px rgba(0,200,255,0.15)}
+.layer-num{font-family:"JetBrains Mono",monospace;font-size:14px;letter-spacing:0.16em;color:var(--accent);width:40px;flex-shrink:0}
+.layer-label{font-family:"Syne",sans-serif;font-weight:700;font-size:26px;color:var(--text);min-width:200px;flex-shrink:0}
+.layer-desc{font-size:16px;line-height:1.35;color:var(--text-2);flex:1}
+.layer:not(:last-child)::after{content:"↓";position:absolute;left:60px;bottom:-12px;color:var(--accent);font-size:14px;font-weight:700;z-index:2}
+.footer{display:flex;justify-content:space-between;align-items:end;padding-top:24px;border-top:1px solid var(--border)}
+.footer .brand{font-family:"JetBrains Mono",monospace;font-size:14px;color:var(--text-2);letter-spacing:0.12em}
+.footer .author{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase}
+</style></head>
+<body>
+  <div class="frame">
+    <div>
+      <div class="header"><div class="dot"></div><div class="kicker">{{kicker}}</div></div>
+      <div class="title-block">
+        <div class="big-title">{{big_title_html}}</div>
+        {{subtitle_block}}
+      </div>
+    </div>
+    <div class="stack">{{layers_html}}</div>
+    <div class="footer"><div class="brand">{{brand}}</div><div class="author">{{author}} · {{domain}}</div></div>
+  </div>
+</body></html>

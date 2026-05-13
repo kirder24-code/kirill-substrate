@@ -1,0 +1,30 @@
+DM TEMPLATE - LinkedIn / Instagram / Google Business Message
+Keep under 300 characters for LinkedIn connection note. Full version for open DM.
+
+---
+SHORT VERSION (LinkedIn connection note, max 200 chars):
+
+Hi [FIRST NAME] - I build AI voice receptionists for Calgary [NICHE] businesses. Answers every call 24/7, books appointments. Worth a quick look?
+
+---
+FULL VERSION (open DM after connection accepted, or direct message on other platforms):
+
+Hi [FIRST NAME],
+
+Noticed [BUSINESS NAME] - do you handle after-hours calls manually or do they go to voicemail?
+
+I set up AI voice receptionists for Calgary [NICHE] businesses. It picks up every call in under 2 seconds, books directly into your calendar, and logs a transcript so nothing falls through the cracks.
+
+You can hear it live: call (587) 318-XXXX
+
+15 minutes to show you how it would work for [BUSINESS NAME]?
+
+- Kirill
+kirill@launchsoloai.com
+
+---
+[PERSONALIZATION NOTE - fill before sending]:
+- Replace [FIRST NAME], [BUSINESS NAME], [NICHE]
+- Replace (587) 318-XXXX with actual demo number
+- Observation line: mention something specific ("noticed you're open weekends", "saw your Google reviews mention wait times")
+- Do NOT use bullet points in the observation line - keep it one natural sentence

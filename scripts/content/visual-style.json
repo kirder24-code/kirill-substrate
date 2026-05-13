@@ -1,0 +1,61 @@
+{
+  "brand": "Substrate · LaunchSoloAI",
+  "author": "Kirill D.",
+  "domain": "launchsoloai.com",
+  "colors": {
+    "void":    "#05070a",
+    "surface": "rgba(0,200,255,0.04)",
+    "border":  "rgba(0,200,255,0.18)",
+    "border_hi": "rgba(0,200,255,0.32)",
+    "accent":  "#00c8ff",
+    "gold":    "#c9a84c",
+    "green":   "#00e676",
+    "amber":   "#ffab00",
+    "red":     "#ff3d5a",
+    "text":    "#f5f7fb",
+    "text_2":  "rgba(245,247,251,0.66)",
+    "text_3":  "rgba(245,247,251,0.36)"
+  },
+  "fonts": {
+    "heading":      "Syne",
+    "heading_url":  "https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800",
+    "body":         "Inter",
+    "body_url":     "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600",
+    "mono":         "JetBrains Mono",
+    "mono_url":     "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500"
+  },
+  "type_scale": {
+    "h1": 64,
+    "h2": 40,
+    "h3": 28,
+    "body": 20,
+    "small": 14,
+    "mono_label": 12
+  },
+  "spacing": {
+    "frame_padding": 72,
+    "block_gap": 32,
+    "tight": 12
+  },
+  "rules": [
+    "No fake dashboards or invented metrics",
+    "No private paths, env refs, or API keys ever rendered",
+    "No exaggerated revenue claims (millions, guaranteed, 100x)",
+    "One core idea per visual — no second message stuffed in",
+    "Readable on mobile: body text >= 20px, headlines >= 40px",
+    "Cyan accent for the ONE thing that matters per visual",
+    "Dark void background — never white",
+    "Footer always shows: brand · author · domain"
+  ],
+  "forbidden_phrases": [
+    "guaranteed",
+    "millions of dollars",
+    "100x",
+    "10x ROI",
+    "secret sauce",
+    "game-changing",
+    "revolutionary",
+    "world's first",
+    "AI-powered"
+  ]
+}

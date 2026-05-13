@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+.venv/
+__pycache__/
+*.pyc
+
+# Secrets
+.env
+.env.local
+.env.*
+*.key
+*.pem
+
+# Databases / runtime state
+*.sqlite
+*.sqlite-journal
+*.db
+.data/
+
+# Logs
+*.log
+.logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build / IDE
+dist/
+build/
+.next/
+.vercel/
+.turbo/
+.idea/
+.vscode/
+
+# Local development
+.local-runtime/
+.drafts/
+test-results/
