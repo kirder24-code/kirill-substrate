@@ -273,7 +273,7 @@ Provider routing is treated as production infrastructure, not configuration.
 |---|---|
 | **ISA gate (Ideal State Artifact)** | Refuses "done" claims without verified Information State Criteria. Prevents the "looks fine" failure mode |
 | **Multi-vendor failover via single env flag** | One env var flips the entire AI stack. Free-tier walls become non-issues |
-| **Subprocess Claude CLI agent pattern** | Run multi-tool agents on Anthropic Max plan without per-token API spend. Used by feedback-extractor, deep-read, and ad-hoc reasoning |
+| **Subprocess Claude CLI agent pattern** | Run multi-tool agents on Anthropic Max plan without per-token API spend. Used by feedback-extractor, deep-read, and ad-hoc reasoning. Anthropic officially supports this pattern via Agent SDK billing as of June 2026 — Substrate adopted it earlier as the natural way to give one developer agentic compute |
 | **Belief graph as organism memory** | 591 beliefs persist across sessions with confidence weights. Outcomes feed back into belief updates. Not session-scoped state |
 | **Closed learning loop** | Operator voice → feedback-extractor → directives → bot behavior change on next run. Confidence-scored (0.85-0.98) |
 | **Verification Doctrine** | Probe-table per artifact type: HTML asset, sent message, DB row, posted content. Single-tool yes/no probe required before "done" |
@@ -354,7 +354,7 @@ substrate/
 
 4. **The hardest part is not the model, it's the discipline layer.** The Verification Doctrine, ISA gate, and egress / injection / billing guards together took as much design work as the cognitive modules. Without them the system optimistically claims "done" and lies to its operator.
 
-5. **Subprocess Claude CLI is an underused pattern.** Running a Max-plan Claude CLI as a tool-using subprocess lets one developer build multi-step agents without per-token API spend.
+5. **Subprocess Claude CLI is an underused pattern.** Running a Max-plan Claude CLI as a tool-using subprocess lets one developer build multi-step agents without per-token API spend. Anthropic officially blessed this pattern in June 2026 with a dedicated Agent SDK billing track — Substrate adopted it earlier as the natural way to give a single operator agentic compute.
 
 6. **A closed learning loop is small in code but huge in compounding.** Voice conversation → feedback-extractor → active-directives → next-run behavior is around 200 lines, but it is what turns Substrate from a static install into something that updates itself.
 
